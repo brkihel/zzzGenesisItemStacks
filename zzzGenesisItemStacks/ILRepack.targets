@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <Target Name="ILRepacker" AfterTargets="Build" Condition="'$(Configuration)' == 'Release'">
+      <PropertyGroup>
+            <MergedAssembly>$(OutputPath)$(TargetName)_merged.dll</MergedAssembly>
+  </PropertyGroup>
+  
+  <!-- Ensure ServerSync.dll exists -->
+        <Error Condition="!Exists('$(OutputPath)ServerSync.dll')" Text="ServerSync.dll not found in output directory!" />
+   <Error Condition="!Exists('$(TargetPath)')" Text="Target assembly not found!" />
+    
+ <ItemGroup>
+      <InputAssemblies Include="$(TargetPath)" />
+     <InputAssemblies Include="$(OutputPath)ServerSync.dll" />
+     </ItemGroup>
+      
+      <Message Text="ILRepack: Merging ServerSync.dll into $(TargetFileName)..." Importance="high" />
+ <Message Text="  Input 1: $(TargetPath)" Importance="high" />
+        <Message Text="  Input 2: $(OutputPath)ServerSync.dll" Importance="high" />
+   <Message Text="  Output: $(MergedAssembly)" Importance="high" />
+ 
+ <PropertyGroup>
+   <ILRepackLibPath>$(OutputPath);$(BEPINEX_PATH)\core;$(BEPINEX_PATH)\plugins;$(VALHEIM_MANAGED)</ILRepackLibPath>
+        </PropertyGroup>
+  
+        <ILRepack 
+        Parallel="true" 
+   DebugInfo="true" 
+     Internalize="true"
+ Union="true"
+      InputAssemblies="@(InputAssemblies)" 
+   OutputFile="$(MergedAssembly)" 
+     TargetKind="SameAsPrimaryAssembly" 
+      LibraryPath="$(ILRepackLibPath)" />
+        
+  <!-- Replace original with merged -->
+ <Message Text="ILRepack: Replacing original assembly with merged version..." Importance="high" />
+        <Copy SourceFiles="$(MergedAssembly)" DestinationFiles="$(TargetPath)" />
+  <Delete Files="$(MergedAssembly)" />
+   <Delete Files="$(OutputPath)ServerSync.dll" />
+        
+ <Message Text="ILRepack: ServerSync.dll successfully merged!" Importance="high" />
+    </Target>
+</Project>
