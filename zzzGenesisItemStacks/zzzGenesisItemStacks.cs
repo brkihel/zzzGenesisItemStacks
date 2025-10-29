@@ -10,15 +10,11 @@ using Jotunn.Utils;
 
 namespace GenesisItemStacks
 {
-    [BepInPlugin(PluginGUID, PluginName, PluginVersion)]
+    [BepInPlugin(PluginInfo.ModGUID, PluginInfo.ModName, PluginInfo.ModVersion)]
     [BepInDependency(Jotunn.Main.ModGuid)]
     [NetworkCompatibility(CompatibilityLevel.EveryoneMustHaveMod, VersionStrictness.Minor)]
     public partial class zzzGenesisItemStacks : BaseUnityPlugin
     {
-        public const string PluginGUID = "com.genesis.itemstacks";
-        public const string PluginName = "zzzGenesisItemStacks";
-        public const string PluginVersion = "2.0.0";
-
         public static zzzGenesisItemStacks instance;
         private Harmony harmony;
 
@@ -46,16 +42,16 @@ namespace GenesisItemStacks
             stackConfig = new ConfigFile(StackConfigFile, true);
             weightConfig = new ConfigFile(WeightConfigFile, true);
 
-            harmony = new Harmony(PluginGUID);
+            harmony = new Harmony(PluginInfo.ModGUID);
             harmony.PatchAll();
 
-            Jotunn.Logger.LogInfo($"{PluginName} v{PluginVersion} loaded successfully. Waiting for ObjectDB initialization...");
+            Jotunn.Logger.LogInfo($"{PluginInfo.ModName} v{PluginInfo.ModVersion} loaded successfully. Waiting for ObjectDB initialization...");
         }
 
         private void OnDestroy()
         {
             harmony?.UnpatchSelf();
-            Jotunn.Logger.LogInfo($"{PluginName} unloaded.");
+            Jotunn.Logger.LogInfo($"{PluginInfo.ModName} unloaded.");
         }
 
         private void ScanAndLoadItems()

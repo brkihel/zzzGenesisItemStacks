@@ -44,10 +44,12 @@ namespace GenesisItemStacks
             Config.SaveOnConfigSet = true;
 
             // ===== Initialize ServerSync =====
-            ConfigSync = new ConfigSync(PluginGUID)
+            // IMPORTANTE: CurrentVersion deve usar a versão completa do assembly
+            ConfigSync = new ConfigSync(PluginInfo.ModGUID)
             {
-                DisplayName = PluginName,
-                MinimumRequiredVersion = PluginVersion
+                DisplayName = PluginInfo.ModName,
+                CurrentVersion = PluginInfo.ModVersion,
+                MinimumRequiredVersion = PluginInfo.ModVersion
             };
 
             // ===== 1 - General (Lock Configuration is auto-created here by ServerSync) =====

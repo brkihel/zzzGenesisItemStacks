@@ -70,8 +70,8 @@
 		<UNITY_FOLDER>$(SolutionDir)JotunnModStubUnity</UNITY_FOLDER>
 	</PropertyGroup>
 
-	<!-- Target para limpar DLLs extras - apenas em Debug -->
-	<Target Name="CleanExtraDlls" AfterTargets="Build" Condition="'$(Configuration)' == 'Debug'">
+	<!-- Target para limpar DLLs extras - apenas em Debug, DEPOIS do ILRepack -->
+	<Target Name="CleanExtraDlls" AfterTargets="ILRepacker" Condition="'$(Configuration)' == 'Debug'">
 		<ItemGroup>
 			<FilesToDelete Include="$(TargetDir)*.dll" Exclude="$(TargetDir)$(TargetName).dll" />
 			<FilesToDelete Include="$(TargetDir)*.pdb" Exclude="$(TargetDir)$(TargetName).pdb" />
