@@ -31,6 +31,14 @@ namespace GenesisItemStacks
         internal static ConfigEntry<float> ammoStackMultiplier = null!;
         internal static ConfigEntry<float> trophyStackMultiplier = null!;
         internal static ConfigEntry<float> valuableStackMultiplier = null!;
+        internal static ConfigEntry<float> stoneStackMultiplier = null!;
+        internal static ConfigEntry<float> materialStackMultiplier = null!;
+        internal static ConfigEntry<float> toolStackMultiplier = null!;
+        internal static ConfigEntry<float> weaponStackMultiplier = null!;
+        internal static ConfigEntry<float> armorStackMultiplier = null!;
+        internal static ConfigEntry<float> seedStackMultiplier = null!;
+        internal static ConfigEntry<float> cropStackMultiplier = null!;
+        internal static ConfigEntry<float> jewelryStackMultiplier = null!;
         internal static ConfigEntry<float> oreWeightMultiplier = null!;
         internal static ConfigEntry<float> woodWeightMultiplier = null!;
         internal static ConfigEntry<float> foodWeightMultiplier = null!;
@@ -38,13 +46,21 @@ namespace GenesisItemStacks
         internal static ConfigEntry<float> ammoWeightMultiplier = null!;
         internal static ConfigEntry<float> trophyWeightMultiplier = null!;
         internal static ConfigEntry<float> valuableWeightMultiplier = null!;
+        internal static ConfigEntry<float> stoneWeightMultiplier = null!;
+        internal static ConfigEntry<float> materialWeightMultiplier = null!;
+        internal static ConfigEntry<float> toolWeightMultiplier = null!;
+        internal static ConfigEntry<float> weaponWeightMultiplier = null!;
+        internal static ConfigEntry<float> armorWeightMultiplier = null!;
+        internal static ConfigEntry<float> seedWeightMultiplier = null!;
+        internal static ConfigEntry<float> cropWeightMultiplier = null!;
+        internal static ConfigEntry<float> jewelryWeightMultiplier = null!;
 
         private void CreateConfigValues()
         {
             Config.SaveOnConfigSet = true;
 
             // ===== Initialize ServerSync =====
-            // IMPORTANTE: CurrentVersion deve usar a versão completa do assembly
+            // IMPORTANT: CurrentVersion must use the full assembly version
             ConfigSync = new ConfigSync(PluginInfo.ModGUID)
             {
                 DisplayName = PluginInfo.ModName,
@@ -91,7 +107,7 @@ namespace GenesisItemStacks
 
             // ===== 4 - Category Multipliers =====
             useCategoryMultipliers = Config.Bind("4 - Category Multipliers", "Use Category Multipliers", false,
-                new ConfigDescription("Enable category-based multipliers for both stack sizes and weights (Ores, Woods, Foods, etc.). Overrides individual item configs but is overridden by Global Multipliers. [Synced with Server]"));
+                new ConfigDescription("Enable category-based multipliers for both stack sizes and weights. An item you edited by hand in the per-item files always wins over this. [Synced with Server]"));
             ConfigSync.AddConfigEntry(useCategoryMultipliers);
 
             oreStackMultiplier = Config.Bind("4 - Category Multipliers", "Ore Stack Multiplier", 1.0f,
@@ -129,6 +145,46 @@ namespace GenesisItemStacks
                     new AcceptableValueRange<float>(0.1f, 100f)));
             ConfigSync.AddConfigEntry(valuableStackMultiplier);
 
+            stoneStackMultiplier = Config.Bind("4 - Category Multipliers", "Stone Stack Multiplier", 1.0f,
+                new ConfigDescription("Stack multiplier for stones and gemstones (Stone, SharpeningStone, uncut gems). [Synced with Server]",
+                    new AcceptableValueRange<float>(0.1f, 100f)));
+            ConfigSync.AddConfigEntry(stoneStackMultiplier);
+
+            materialStackMultiplier = Config.Bind("4 - Category Multipliers", "Material Stack Multiplier", 1.0f,
+                new ConfigDescription("Stack multiplier for crafting materials, including REFINED metal bars (Copper, Tin, Iron, Bronze). [Synced with Server]",
+                    new AcceptableValueRange<float>(0.1f, 100f)));
+            ConfigSync.AddConfigEntry(materialStackMultiplier);
+
+            toolStackMultiplier = Config.Bind("4 - Category Multipliers", "Tool Stack Multiplier", 1.0f,
+                new ConfigDescription("Stack multiplier for tools (hammer, hoe, cultivator, pickaxes). [Synced with Server]",
+                    new AcceptableValueRange<float>(0.1f, 100f)));
+            ConfigSync.AddConfigEntry(toolStackMultiplier);
+
+            weaponStackMultiplier = Config.Bind("4 - Category Multipliers", "Weapon Stack Multiplier", 1.0f,
+                new ConfigDescription("Stack multiplier for weapons. [Synced with Server]",
+                    new AcceptableValueRange<float>(0.1f, 100f)));
+            ConfigSync.AddConfigEntry(weaponStackMultiplier);
+
+            armorStackMultiplier = Config.Bind("4 - Category Multipliers", "Armor Stack Multiplier", 1.0f,
+                new ConfigDescription("Stack multiplier for armour pieces. [Synced with Server]",
+                    new AcceptableValueRange<float>(0.1f, 100f)));
+            ConfigSync.AddConfigEntry(armorStackMultiplier);
+
+            seedStackMultiplier = Config.Bind("4 - Category Multipliers", "Seed Stack Multiplier", 1.0f,
+                new ConfigDescription("Stack multiplier for seeds. [Synced with Server]",
+                    new AcceptableValueRange<float>(0.1f, 100f)));
+            ConfigSync.AddConfigEntry(seedStackMultiplier);
+
+            cropStackMultiplier = Config.Bind("4 - Category Multipliers", "Crop Stack Multiplier", 1.0f,
+                new ConfigDescription("Stack multiplier for harvested crops. [Synced with Server]",
+                    new AcceptableValueRange<float>(0.1f, 100f)));
+            ConfigSync.AddConfigEntry(cropStackMultiplier);
+
+            jewelryStackMultiplier = Config.Bind("4 - Category Multipliers", "Jewelry Stack Multiplier", 1.0f,
+                new ConfigDescription("Stack multiplier for rings, necklaces and other jewellery. [Synced with Server]",
+                    new AcceptableValueRange<float>(0.1f, 100f)));
+            ConfigSync.AddConfigEntry(jewelryStackMultiplier);
+
             // ===== 5 - Category Weight Multipliers =====
             oreWeightMultiplier = Config.Bind("5 - Category Weight Multipliers", "Ore Weight Multiplier", 1.0f,
                 new ConfigDescription("Weight multiplier for all ores (Copper, Iron, Silver, etc.). [Synced with Server]",
@@ -164,6 +220,46 @@ namespace GenesisItemStacks
                 new ConfigDescription("Weight multiplier for all valuables (Amber, Ruby, Coins, Crystals, etc.). [Synced with Server]",
                     new AcceptableValueRange<float>(0.01f, 100f)));
             ConfigSync.AddConfigEntry(valuableWeightMultiplier);
+
+            stoneWeightMultiplier = Config.Bind("5 - Category Weight Multipliers", "Stone Weight Multiplier", 1.0f,
+                new ConfigDescription("Weight multiplier for stones and gemstones (Stone, SharpeningStone, uncut gems). [Synced with Server]",
+                    new AcceptableValueRange<float>(0.01f, 100f)));
+            ConfigSync.AddConfigEntry(stoneWeightMultiplier);
+
+            materialWeightMultiplier = Config.Bind("5 - Category Weight Multipliers", "Material Weight Multiplier", 1.0f,
+                new ConfigDescription("Weight multiplier for crafting materials, including REFINED metal bars (Copper, Tin, Iron, Bronze). [Synced with Server]",
+                    new AcceptableValueRange<float>(0.01f, 100f)));
+            ConfigSync.AddConfigEntry(materialWeightMultiplier);
+
+            toolWeightMultiplier = Config.Bind("5 - Category Weight Multipliers", "Tool Weight Multiplier", 1.0f,
+                new ConfigDescription("Weight multiplier for tools (hammer, hoe, cultivator, pickaxes). [Synced with Server]",
+                    new AcceptableValueRange<float>(0.01f, 100f)));
+            ConfigSync.AddConfigEntry(toolWeightMultiplier);
+
+            weaponWeightMultiplier = Config.Bind("5 - Category Weight Multipliers", "Weapon Weight Multiplier", 1.0f,
+                new ConfigDescription("Weight multiplier for weapons. [Synced with Server]",
+                    new AcceptableValueRange<float>(0.01f, 100f)));
+            ConfigSync.AddConfigEntry(weaponWeightMultiplier);
+
+            armorWeightMultiplier = Config.Bind("5 - Category Weight Multipliers", "Armor Weight Multiplier", 1.0f,
+                new ConfigDescription("Weight multiplier for armour pieces. [Synced with Server]",
+                    new AcceptableValueRange<float>(0.01f, 100f)));
+            ConfigSync.AddConfigEntry(armorWeightMultiplier);
+
+            seedWeightMultiplier = Config.Bind("5 - Category Weight Multipliers", "Seed Weight Multiplier", 1.0f,
+                new ConfigDescription("Weight multiplier for seeds. [Synced with Server]",
+                    new AcceptableValueRange<float>(0.01f, 100f)));
+            ConfigSync.AddConfigEntry(seedWeightMultiplier);
+
+            cropWeightMultiplier = Config.Bind("5 - Category Weight Multipliers", "Crop Weight Multiplier", 1.0f,
+                new ConfigDescription("Weight multiplier for harvested crops. [Synced with Server]",
+                    new AcceptableValueRange<float>(0.01f, 100f)));
+            ConfigSync.AddConfigEntry(cropWeightMultiplier);
+
+            jewelryWeightMultiplier = Config.Bind("5 - Category Weight Multipliers", "Jewelry Weight Multiplier", 1.0f,
+                new ConfigDescription("Weight multiplier for rings, necklaces and other jewellery. [Synced with Server]",
+                    new AcceptableValueRange<float>(0.01f, 100f)));
+            ConfigSync.AddConfigEntry(jewelryWeightMultiplier);
 
             // React to config changes
             Config.SettingChanged += OnConfigChanged;

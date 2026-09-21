@@ -280,8 +280,18 @@ namespace GenesisItemStacks
                 int baseStack = (int)stackEntry.DefaultValue;
                 int newStack;
 
-                // Priority: Global > Category > Individual
-                if (useGlobalStackMultiplier.Value)
+                // Priority: hand-edited item > Global > Category > vanilla.
+                //
+                // The per-item file lists every item already filled in with its vanilla
+                // value, so a value different from the default means the player typed it
+                // on purpose. Before this, the per-item files were unreachable whenever a
+                // global or category multiplier was on: the file looked like it worked and
+                // silently did nothing, which is the worst kind of setting.
+                if (stackEntry.Value != baseStack)
+                {
+                    newStack = stackEntry.Value;
+                }
+                else if (useGlobalStackMultiplier.Value)
                 {
                     newStack = Mathf.RoundToInt(baseStack * globalStackMultiplier.Value);
                 }
@@ -311,8 +321,13 @@ namespace GenesisItemStacks
                 float baseWeight = (float)weightEntry.DefaultValue;
                 float newWeight;
 
-                // Priority: Global > Category > Individual
-                if (useGlobalWeightMultiplier.Value)
+                // Same priority as the stack size above. Weight is a float, so "the player
+                // changed it" is a tolerance check, not equality.
+                if (Mathf.Abs(weightEntry.Value - baseWeight) > 0.0001f)
+                {
+                    newWeight = weightEntry.Value;
+                }
+                else if (useGlobalWeightMultiplier.Value)
                 {
                     newWeight = baseWeight * globalWeightMultiplier.Value;
                 }
@@ -350,7 +365,15 @@ namespace GenesisItemStacks
                 ItemCategories.Category.Ammunition => ammoStackMultiplier.Value,
                 ItemCategories.Category.Trophy => trophyStackMultiplier.Value,
                 ItemCategories.Category.Valuable => valuableStackMultiplier.Value,
-                _ => 1.0f // Default: no multiplier
+                ItemCategories.Category.Stone => stoneStackMultiplier.Value,
+                ItemCategories.Category.Material => materialStackMultiplier.Value,
+                ItemCategories.Category.Tool => toolStackMultiplier.Value,
+                ItemCategories.Category.Weapon => weaponStackMultiplier.Value,
+                ItemCategories.Category.Armor => armorStackMultiplier.Value,
+                ItemCategories.Category.Seed => seedStackMultiplier.Value,
+                ItemCategories.Category.Crop => cropStackMultiplier.Value,
+                ItemCategories.Category.Jewelry => jewelryStackMultiplier.Value,
+                _ => 1.0f // Undefined only: we could not classify it, so leave it alone
             };
         }
 
@@ -365,7 +388,15 @@ namespace GenesisItemStacks
                 ItemCategories.Category.Ammunition => ammoWeightMultiplier.Value,
                 ItemCategories.Category.Trophy => trophyWeightMultiplier.Value,
                 ItemCategories.Category.Valuable => valuableWeightMultiplier.Value,
-                _ => 1.0f // Default: no multiplier
+                ItemCategories.Category.Stone => stoneWeightMultiplier.Value,
+                ItemCategories.Category.Material => materialWeightMultiplier.Value,
+                ItemCategories.Category.Tool => toolWeightMultiplier.Value,
+                ItemCategories.Category.Weapon => weaponWeightMultiplier.Value,
+                ItemCategories.Category.Armor => armorWeightMultiplier.Value,
+                ItemCategories.Category.Seed => seedWeightMultiplier.Value,
+                ItemCategories.Category.Crop => cropWeightMultiplier.Value,
+                ItemCategories.Category.Jewelry => jewelryWeightMultiplier.Value,
+                _ => 1.0f // Undefined only: we could not classify it, so leave it alone
             };
         }
     }

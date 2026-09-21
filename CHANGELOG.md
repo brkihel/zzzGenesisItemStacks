@@ -4,6 +4,57 @@ All notable changes to **Genesis Item Stacks** will be documented in this file.
 
 ---
 
+## [2.2.0] - 2026 - 🪨 The Stone Fix
+
+The per-item files were a lie. This release makes them mean what they look like
+they mean, and gives every category a multiplier instead of only half of them.
+
+### 🐛 Bug Fixes
+- 🪨 **Per-item values are no longer ignored.** Setting `MaxStack = 100` for
+  `[Item.Stone]` did nothing while a global or category multiplier was on: the
+  file looked like it worked and silently did not. A value different from the
+  vanilla default now means you typed it on purpose, and it wins.
+- 🗂️ **Eight categories had no multiplier at all** and silently fell back to
+  vanilla: **Stone**, **Material**, **Tool**, **Weapon**, **Armor**, **Seed**,
+  **Crop** and **Jewelry**. `Material` is the big one — it holds 283 items,
+  including every **refined metal bar** (Copper, Tin, Iron, Bronze). An `Ore`
+  multiplier only ever reached the raw ore; the bars you smelt never moved.
+
+### 🚀 New Features
+- 📈 **Sixteen new category settings**, stack and weight for each of the eight
+  categories above, under `4 - Category Multipliers` and
+  `5 - Category Weight Multipliers`.
+
+### 🎮 Gameplay Impact
+- ⚖️ **New configuration priority**, replacing the one from 2.0.0:
+  1. **Per-item value you edited by hand** (highest priority)
+  2. Global multipliers
+  3. Category multipliers
+  4. Vanilla value
+- A per-item value left at its vanilla default counts as "untouched", so the
+  category and global multipliers still reach it.
+- `Undefined` stays at 1.0 on purpose: it is the bucket for items the mod could
+  not classify, and guessing there would do more harm than good.
+
+### 🛠️ Technical Improvements
+- Weight comparison uses a tolerance instead of float equality.
+- Config files normalised to UTF-8; all comments and code in English.
+- The description of `Use Category Multipliers` no longer claims it overrides
+  per-item configs, because it no longer does.
+
+---
+
+## [2.1.0] - 2025 - 🔢 The Version Check
+
+### 🛠️ Technical Improvements
+- Reworked the ServerSync version check and centralised plugin metadata in
+  `PluginInfo.cs`, so the BepInEx attribute, the assembly version and the
+  version sent to clients can no longer drift apart.
+- Simplified the ILRepack setup and moved to ILRepack.Lib.MSBuild.Task 2.0.46,
+  so the project builds outside Windows.
+
+---
+
 ## [2.0.0] - 2024 - 🗂️ The Category Revolution
 
 ### 🚀 Major Features
