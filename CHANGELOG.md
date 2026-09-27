@@ -4,6 +4,16 @@ All notable changes to **Genesis Item Stacks** will be documented in this file.
 
 ---
 
+## [2.3.0] - 2026 - Item catalog cache
+
+- Cache discovered item defaults and categories across launches, keyed by the Valheim build and loaded plugin identities, versions and DLL metadata.
+- Reuse the catalog when the item count also matches; rebuild it after an update or a changed item count.
+- Bind general and per-item settings with automatic saving paused, then write each config file once instead of once per entry.
+- Preserve edited stack and weight settings and their precedence over multipliers.
+- Reference Valheim's assembly explicitly and patch the current private `ObjectDB.Awake` method by name for reproducible builds.
+
+---
+
 ## [2.2.0] - 2026 - 🪨 The Stone Fix
 
 The per-item files were a lie. This release makes them mean what they look like

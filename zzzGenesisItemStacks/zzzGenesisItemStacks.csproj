@@ -9,6 +9,7 @@
 		<Deterministic>true</Deterministic>
 		<LangVersion>10</LangVersion>
 		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+		<VALHEIM_MANAGED>$(VALHEIM_INSTALL)/valheim_Data/Managed</VALHEIM_MANAGED>
 		<!-- Evita copiar dependências para a pasta de saída -->
 		<CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
 		<!-- Copiar assemblies de referência -->
@@ -33,6 +34,10 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<Reference Include="assembly_valheim">
+			<HintPath>$(VALHEIM_MANAGED)/assembly_valheim.dll</HintPath>
+			<Private>False</Private>
+		</Reference>
 		<Reference Include="System" />
 		<Reference Include="System.Core" />
 		<Reference Include="System.Xml.Linq" />
@@ -66,7 +71,6 @@
 	</ItemGroup>
 
 	<PropertyGroup>
-		<VALHEIM_MANAGED>$(VALHEIM_INSTALL)/valheim_Data/Managed</VALHEIM_MANAGED>
 		<UNITY_FOLDER>$(SolutionDir)JotunnModStubUnity</UNITY_FOLDER>
 	</PropertyGroup>
 

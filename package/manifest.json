@@ -1,0 +1,9 @@
+{
+  "name": "zzzGenesisItemStacks",
+  "version_number": "2.3.0",
+  "website_url": "https://github.com/brkihel/zzzGenesisItemStacks",
+  "description": "Configurable stack sizes and weights for Valheim items, with cached item discovery for faster startup.",
+  "dependencies": [
+    "ValheimModding-Jotunn-2.30.2"
+  ]
+}
