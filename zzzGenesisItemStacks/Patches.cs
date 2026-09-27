@@ -33,7 +33,7 @@ namespace GenesisItemStacks
         /// Fallback patch: If CopyOtherDB is never called (e.g., single player),
         /// use ObjectDB.Awake with a one-frame delay to ensure Jotunn finishes.
         /// </summary>
-        [HarmonyPatch(typeof(ObjectDB), nameof(ObjectDB.Awake))]
+        [HarmonyPatch(typeof(ObjectDB), "Awake")]
         [HarmonyPostfix]
         public static void ObjectDB_Awake_Postfix(ObjectDB __instance)
         {

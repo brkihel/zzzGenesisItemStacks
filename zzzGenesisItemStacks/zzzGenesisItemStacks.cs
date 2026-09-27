@@ -27,20 +27,33 @@ namespace GenesisItemStacks
 
         public static Dictionary<string, ConfigEntry<int>> itemStacks = new Dictionary<string, ConfigEntry<int>>();
         public static Dictionary<string, ConfigEntry<float>> itemWeights = new Dictionary<string, ConfigEntry<float>>();
+        private static readonly Dictionary<string, ItemCategories.Category> itemCategories = new Dictionary<string, ItemCategories.Category>();
+        private static readonly Dictionary<string, ConfigEntry<int>> boundStacks = new Dictionary<string, ConfigEntry<int>>();
+        private static readonly Dictionary<string, ConfigEntry<float>> boundWeights = new Dictionary<string, ConfigEntry<float>>();
+        private static int catalogObjectCount = -1;
 
         private void Awake()
         {
             instance = this;
 
-            CreateConfigValues();
+            Config.SaveOnConfigSet = false;
+            try
+            {
+                CreateConfigValues();
+                Config.Save();
+            }
+            finally
+            {
+                Config.SaveOnConfigSet = true;
+            }
 
             if (!Directory.Exists(ConfigDir))
             {
                 Directory.CreateDirectory(ConfigDir);
             }
 
-            stackConfig = new ConfigFile(StackConfigFile, true);
-            weightConfig = new ConfigFile(WeightConfigFile, true);
+            stackConfig = new ConfigFile(StackConfigFile, false);
+            weightConfig = new ConfigFile(WeightConfigFile, false);
 
             harmony = new Harmony(PluginInfo.ModGUID);
             harmony.PatchAll();
@@ -63,10 +76,9 @@ namespace GenesisItemStacks
                 return;
             }
 
-            Jotunn.Logger.LogInfo("Scanning items to generate configuration files...");
-
             itemStacks.Clear();
             itemWeights.Clear();
+            itemCategories.Clear();
 
             if (ObjectDB.instance == null)
             {
@@ -78,6 +90,71 @@ namespace GenesisItemStacks
             {
                 Jotunn.Logger.LogInfo($"ObjectDB has {ObjectDB.instance.m_items.Count} items registered.");
             }
+
+            int objectCount = ObjectDB.instance.m_items.Count;
+            string fingerprint = ItemCatalogCache.Fingerprint();
+            stackConfig.SaveOnConfigSet = false;
+            weightConfig.SaveOnConfigSet = false;
+            try
+            {
+                if (ItemCatalogCache.TryLoad(fingerprint, objectCount, out var cached))
+                {
+                    foreach (var record in cached)
+                    {
+                        if (ShouldProcess(record.IsModded))
+                            BindItem(record);
+                    }
+                    catalogObjectCount = objectCount;
+                    Jotunn.Logger.LogInfo($"Loaded {cached.Count} items from the catalog cache; item discovery skipped.");
+                    SaveItemConfigs();
+                    ApplyChangesToAllItems();
+                    return;
+                }
+
+                Jotunn.Logger.LogInfo("Item catalog changed or missing. Scanning ObjectDB...");
+                ScanCurrentItems(fingerprint, objectCount);
+            }
+            finally
+            {
+                stackConfig.SaveOnConfigSet = true;
+                weightConfig.SaveOnConfigSet = true;
+            }
+        }
+
+        private static bool ShouldProcess(bool isModded)
+        {
+            return isModded ? affectModdedItems.Value : affectVanillaItems.Value;
+        }
+
+        private static void BindItem(CatalogItem record)
+        {
+            string section = $"Item.{record.PrefabName}";
+            if (!boundStacks.TryGetValue(record.PrefabName, out var stackEntry))
+            {
+                stackEntry = stackConfig.Bind(section, "MaxStack", record.MaxStack,
+                    $"Max stack size for {record.ItemName} ({record.PrefabName}) - Category: {ItemCategories.GetCategoryName(record.Category)}");
+                boundStacks[record.PrefabName] = stackEntry;
+            }
+            if (!boundWeights.TryGetValue(record.PrefabName, out var weightEntry))
+            {
+                weightEntry = weightConfig.Bind(section, "Weight", record.Weight,
+                    $"Weight for {record.ItemName} ({record.PrefabName}) - Category: {ItemCategories.GetCategoryName(record.Category)}");
+                boundWeights[record.PrefabName] = weightEntry;
+            }
+            itemStacks[record.PrefabName] = stackEntry;
+            itemWeights[record.PrefabName] = weightEntry;
+            itemCategories[record.PrefabName] = record.Category;
+        }
+
+        private static void SaveItemConfigs()
+        {
+            stackConfig.Save();
+            weightConfig.Save();
+        }
+
+        private void ScanCurrentItems(string fingerprint, int objectCount)
+        {
+            var catalog = new List<CatalogItem>();
 
             int vanillaCount = 0;
             int moddedCount = 0;
@@ -118,7 +195,7 @@ namespace GenesisItemStacks
                 int maxStack = itemDrop.m_itemData.m_shared.m_maxStackSize;
                 string prefabName = itemPrefab.name.Replace("(Clone)", "").Trim();
 
-                if (maxStack <= 1)
+                if (maxStack <= 1 && !boundStacks.ContainsKey(prefabName))
                 {
                     nonStackableCount++;
                     if (enableDebugLogs.Value)
@@ -143,6 +220,18 @@ namespace GenesisItemStacks
 
                 // Detect category
                 var category = ItemCategories.DetectCategory(itemDrop.m_itemData);
+                var record = new CatalogItem
+                {
+                    PrefabName = prefabName,
+                    ItemName = itemDrop.m_itemData.m_shared.m_name,
+                    MaxStack = boundStacks.TryGetValue(prefabName, out var previousStack)
+                        ? (int)previousStack.DefaultValue : maxStack,
+                    Weight = boundWeights.TryGetValue(prefabName, out var previousWeight)
+                        ? (float)previousWeight.DefaultValue : itemDrop.m_itemData.m_shared.m_weight,
+                    Category = category,
+                    IsModded = isModded
+                };
+                catalog.Add(record);
                 if (!categoryCounts.ContainsKey(category))
                     categoryCounts[category] = 0;
                 categoryCounts[category]++;
@@ -153,25 +242,11 @@ namespace GenesisItemStacks
                 }
 
                 // Check if we should process this item based on user settings
-                bool shouldProcess = (isVanilla && affectVanillaItems.Value) ||
-            (isModded && affectModdedItems.Value);
+                bool shouldProcess = ShouldProcess(isModded);
 
                 if (shouldProcess)
                 {
-                    string section = $"Item.{prefabName}";
-                    string itemName = itemDrop.m_itemData.m_shared.m_name;
-
-                    // Stack size config
-                    var stackEntry = stackConfig.Bind(section, "MaxStack",
-            itemDrop.m_itemData.m_shared.m_maxStackSize,
-                   $"Max stack size for {itemName} ({prefabName}) - Category: {ItemCategories.GetCategoryName(category)}");
-                    itemStacks[prefabName] = stackEntry;
-
-                    // Weight config
-                    var weightEntry = weightConfig.Bind(section, "Weight",
-                            itemDrop.m_itemData.m_shared.m_weight,
-                                   $"Weight for {itemName} ({prefabName}) - Category: {ItemCategories.GetCategoryName(category)}");
-                    itemWeights[prefabName] = weightEntry;
+                    BindItem(record);
 
                     if (isVanilla)
                         vanillaCount++;
@@ -193,8 +268,9 @@ namespace GenesisItemStacks
                 }
             }
 
-            stackConfig.Save();
-            weightConfig.Save();
+            SaveItemConfigs();
+            ItemCatalogCache.Save(fingerprint, objectCount, catalog);
+            catalogObjectCount = objectCount;
 
             // Always show summary
             Jotunn.Logger.LogInfo("=== Item Configuration Summary ===");
@@ -245,6 +321,13 @@ namespace GenesisItemStacks
                 return;
             }
 
+            if (ObjectDB.instance.m_items.Count != catalogObjectCount && instance != null)
+            {
+                Jotunn.Logger.LogInfo("ObjectDB item count changed; refreshing item catalog.");
+                instance.ScanAndLoadItems();
+                return;
+            }
+
             if (enableDebugLogs.Value)
                 Jotunn.Logger.LogInfo("Applying item modifications...");
 
@@ -252,7 +335,7 @@ namespace GenesisItemStacks
             foreach (var itemPrefab in ObjectDB.instance.m_items)
             {
                 var itemDrop = itemPrefab?.GetComponent<ItemDrop>();
-                if (itemDrop != null && itemDrop.m_itemData != null && itemDrop.m_itemData.m_shared.m_maxStackSize > 1)
+                if (itemDrop != null && itemDrop.m_itemData != null)
                 {
                     if (ApplyChangesToItem(itemDrop))
                         appliedCount++;
@@ -269,10 +352,13 @@ namespace GenesisItemStacks
                 return false;
 
             string prefabName = item.gameObject.name.Replace("(Clone)", "").Trim();
+            if (!itemStacks.ContainsKey(prefabName) && !itemWeights.ContainsKey(prefabName))
+                return false;
             bool wasModified = false;
 
             // Detect category for this item
-            var category = ItemCategories.DetectCategory(item.m_itemData);
+            var category = itemCategories.TryGetValue(prefabName, out var cachedCategory)
+                ? cachedCategory : ItemCategories.DetectCategory(item.m_itemData);
 
             // Apply stack size changes
             if (itemStacks.TryGetValue(prefabName, out var stackEntry))

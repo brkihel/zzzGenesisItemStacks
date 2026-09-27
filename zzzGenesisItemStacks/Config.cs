@@ -57,8 +57,6 @@ namespace GenesisItemStacks
 
         private void CreateConfigValues()
         {
-            Config.SaveOnConfigSet = true;
-
             // ===== Initialize ServerSync =====
             // IMPORTANT: CurrentVersion must use the full assembly version
             ConfigSync = new ConfigSync(PluginInfo.ModGUID)
