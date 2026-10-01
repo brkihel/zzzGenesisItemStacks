@@ -1,5 +1,7 @@
 # Genesis Item Stacks
 
+[![Discord](https://img.shields.io/badge/Discord-GenesisMods-5865F2?style=flat-square&logo=discord&logoColor=white)](https://discord.gg/TZ785sYtgx)
+
 **Version:** 2.0.0
 **Author:** GenesisProject  
 **Dependencies:** Jötunn 2.26.1+
@@ -25,3 +27,7 @@ Genesis Item Stacks is a highly configurable Valheim mod that lets you customize
 2. Install **Jötunn 2.26.1+**  
 3. Drop `zzzGenesisItemStacks.dll` into `BepInEx/plugins/`  
 4. Launch the game once to generate configuration files
+
+## Community and support
+
+Questions, bug reports and release news on the **[GenesisMods Discord](https://discord.gg/TZ785sYtgx)**.
